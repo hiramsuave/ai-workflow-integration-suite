@@ -40,3 +40,20 @@ It forms the foundation for:
 git clone https://github.com/<yourusername>/ai-workflow-integration-suite.git
 cd ai-workflow-integration-suite
 npm install
+
+## 🧪 Live Demo Access
+
+**Public API (Deployed via Render):**
+https://ai-workflow-integration-suite.onrender.com/api/chat
+
+
+**Example Request (cURL):**
+```bash
+curl -X POST https://ai-workflow-integration-suite.onrender.com/api/chat \
+     -H "Content-Type: application/json" \
+     -d '{"message":"Write a motivational quote."}'
+
+**Test Streaming: 
+curl -N -X POST https://ai-workflow-integration-suite.onrender.com/api/chat/stream \
+     -H "Content-Type: application/json" \
+     -d '{"message":"Write a one-sentence leadership quote."}'
