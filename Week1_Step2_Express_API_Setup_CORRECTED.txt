@@ -1,0 +1,160 @@
+Week 1 – Step 2 (CORRECTED): Express API Setup
+
+This document reflects the EXACT configuration that worked on your machine (Windows, Node LTS), including the fixed tsconfig.json and the simplified package.json (no dist/, no nodemon).
+
+──────────────────────────────────────────────────────────────────────────────
+🎯 Objective
+Build a basic REST API using Express + TypeScript with a functional /api/chat route.
+This is the foundation for your AI Integration backend before wiring up Azure OpenAI.
+
+──────────────────────────────────────────────────────────────────────────────
+🪜 Step-by-Step Summary
+
+1) Install Express and Supporting Libraries (from project root)
+----------------------------------------------------------------
+npm install express cors dotenv
+npm install -D @types/express @types/cors @types/node ts-node typescript
+
+• express  → Web API framework
+• cors     → Enables cross-origin requests
+• dotenv   → Loads environment variables securely
+• @types/* → TypeScript type definitions
+• ts-node  → Run TypeScript directly (no build step)
+• typescript → TypeScript compiler
+
+2) FINAL package.json (WORKING)
+--------------------------------
+Use this EXACT file (no dist/, no nodemon). It runs TypeScript directly via ts-node.
+
+{
+  "name": "ai-chat-api",
+  "version": "1.0.0",
+  "description": "AI Integration Engineer - Chat API (TypeScript + Express)",
+  "main": "src/app.ts",
+  "scripts": {
+    "dev": "npx ts-node src/app.ts",
+    "start": "npx ts-node src/app.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
+    "@types/node": "^24.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}
+
+3) FINAL tsconfig.json (WORKING)
+---------------------------------
+This is the simplified, production-safe config that removes problematic flags like verbatimModuleSyntax and works with CommonJS + ts-node.
+
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"]
+}
+
+4) Project Structure
+---------------------
+ai-chat-api/
+├── node_modules/
+├── src/
+│   ├── app.ts            # Express app entry point
+│   ├── routes/
+│   │   └── chat.ts       # /api/chat endpoint
+│   └── utils/
+│       └── logger.ts     # (placeholder for Step 4)
+├── .env                  # environment variables (will be used in Step 3)
+├── package.json
+├── tsconfig.json
+└── package-lock.json
+
+5) Create the Express Server (src/app.ts)
+------------------------------------------
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("🚀 AI Chat API is running!");
+});
+
+import chatRouter from "./routes/chat";
+app.use("/api/chat", chatRouter);
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
+
+6) Create the Chat Route (src/routes/chat.ts)
+----------------------------------------------
+import express from "express";
+const router = express.Router();
+
+router.post("/", async (req, res) => {
+  const { message } = req.body;
+  console.log("Incoming message:", message);
+
+  // Temporary mock response (to be replaced with Azure OpenAI in Step 3)
+  res.json({ reply: `Echo: ${message}` });
+});
+
+export default router;
+
+7) Run and Test
+----------------
+Start the server:
+npm run dev
+
+Expected console output:
+✅ Server running on http://localhost:3000
+
+Test with curl/Postman/Thunder Client:
+POST http://localhost:3000/api/chat
+Content-Type: application/json
+
+{
+  "message": "Hello AI!"
+}
+
+Expected JSON response:
+{
+  "reply": "Echo: Hello AI!"
+}
+
+──────────────────────────────────────────────────────────────────────────────
+🧠 Key Takeaways
+• Uses TypeScript directly with ts-node (no dist/ build step needed for dev)
+• CommonJS module system + esModuleInterop allows clean imports (import express from "express")
+• Clean, minimal configs that match your working environment exactly
+
+──────────────────────────────────────────────────────────────────────────────
+✅ Outcome
+You now have a running Express server with a working /api/chat route, aligned to the exact tsconfig.json and package.json that worked. Next step: wire this route to Azure OpenAI.
+
+──────────────────────────────────────────────────────────────────────────────
+End of Week 1 – Step 2 (CORRECTED)

@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2020",                        // Modern JavaScript output
+    "module": "commonjs",                      // Standard for Node.js projects
+    "rootDir": "src",                          // Source folder for TypeScript files
+    "strict": true,                            // Enables strict type checking
+    "esModuleInterop": true,                   // Allows 'import express from "express"'
+    "skipLibCheck": true,                      // Speeds up compilation (skip .d.ts checks)
+    "forceConsistentCasingInFileNames": true   // Prevents filename case mismatches
+  },
+  "include": ["src/**/*"]                      // Compile all files inside /src
+}
+
