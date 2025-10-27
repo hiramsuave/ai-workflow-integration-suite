@@ -1,27 +1,35 @@
 {
   "name": "ai-chat-api",
   "version": "1.0.0",
-  "description": "AI Integration Engineer - Chat API (TypeScript + Express)",
-  "main": "src/app.ts",
+  "description": "AI Integration Engineer - Chat API (TypeScript + Express + OpenAI SDK)",
+  "main": "dist/app.js",
   "scripts": {
     "dev": "npx ts-node src/app.ts",
-    "start": "npx ts-node src/app.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/app.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "typescript",
+    "express",
+    "openai",
+    "api",
+    "integration",
+    "ai",
+    "solutions-engineer"
+  ],
+  "author": "Hiram Quezada",
   "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "openai": "^4.67.3"
+  },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.4",
     "@types/node": "^24.9.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "openai": "^6.7.0"
   }
 }
