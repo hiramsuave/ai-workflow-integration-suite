@@ -1,0 +1,201 @@
+Week 1 – Step 5: Production Readiness (Error Handling, Token Tracking, Logging)
+
+🎯 Objective
+Your AI Chat API is now upgraded to a **production-ready backend** — resilient, observable, and transparent.  
+This step ensures reliability, traceability, and professional-grade telemetry exactly as expected from an AI Integration Engineer.
+
+──────────────────────────────────────────────────────────────────────────────
+✅ What You Achieved
+1. Request ID tracking and global error handling
+2. Token usage + cost estimation from every OpenAI response
+3. JSON-based structured logging (production-ready format)
+4. Response headers exposing latency, tokens, and cost
+5. Strict TypeScript compliance
+
+──────────────────────────────────────────────────────────────────────────────
+🧩 Final Verified Folder Structure
+ai-chat-api/
+├── src/
+│   ├── app.ts
+│   ├── routes/
+│   │   └── chat.ts
+│   ├── services/
+│   │   └── openaiService.ts
+│   ├── middleware/
+│   │   └── http.ts
+│   └── utils/
+│       ├── cost.ts
+│       └── logger.ts
+├── .env
+├── package.json
+└── tsconfig.json
+
+──────────────────────────────────────────────────────────────────────────────
+1️⃣ src/utils/logger.ts
+---------------------------------
+Lightweight structured JSON logger (no dependencies required).
+
+export const logger = {
+  info: (msg: string, meta: Record<string, any> = {}) =>
+    console.log(JSON.stringify({ level: "info", ts: new Date().toISOString(), msg, ...meta })),
+  error: (msg: string, meta: Record<string, any> = {}) =>
+    console.error(JSON.stringify({ level: "error", ts: new Date().toISOString(), msg, ...meta })),
+};
+
+──────────────────────────────────────────────────────────────────────────────
+2️⃣ src/middleware/http.ts
+---------------------------------
+Adds request IDs, async error handling, and global fallback safety.
+
+import { randomUUID } from "crypto";
+import type { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
+
+export function withRequestId(req: Request, res: Response, next: NextFunction) {
+  const id = randomUUID();
+  (req as any).requestId = id;
+  res.setHeader("X-Request-Id", id);
+  next();
+}
+
+export function asyncHandler(fn: any) {
+  return function (req: Request, res: Response, next: NextFunction) {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+}
+
+export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction) {
+  const id = (req as any).requestId;
+  logger.error("Unhandled error", { requestId: id, err: String(err?.message || err) });
+  res.status(500).json({ error: "Internal Server Error", requestId: id });
+}
+
+──────────────────────────────────────────────────────────────────────────────
+3️⃣ src/utils/cost.ts
+---------------------------------
+Handles token counting and cost estimation using `.env` rates.
+
+export type Usage = { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+
+const IN_RATE = Number(process.env.COST_INPUT_PER_1K || 0.0005);
+const OUT_RATE = Number(process.env.COST_OUTPUT_PER_1K || 0.0015);
+
+export function estimateCost(usage: Usage | undefined) {
+  if (!usage) return 0;
+  const inTok = usage.prompt_tokens || 0;
+  const outTok = usage.completion_tokens || 0;
+  const cost = (inTok / 1000) * IN_RATE + (outTok / 1000) * OUT_RATE;
+  return Number(cost.toFixed(6));
+}
+
+export function tokensFromUsage(usage: Usage | undefined) {
+  return usage?.total_tokens || ((usage?.prompt_tokens || 0) + (usage?.completion_tokens || 0));
+}
+
+Add to your `.env`:
+COST_INPUT_PER_1K=0.0005
+COST_OUTPUT_PER_1K=0.0015
+
+──────────────────────────────────────────────────────────────────────────────
+4️⃣ src/app.ts
+---------------------------------
+Integrates middleware, routes, and error handler in correct order.
+
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import chatRouter from "./routes/chat";
+import { withRequestId, errorHandler } from "./middleware/http";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(withRequestId);
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (_req, res) => {
+  res.send("🚀 AI Chat API is running!");
+});
+
+app.use("/api/chat", chatRouter);
+
+// Error handler must be last
+app.use(errorHandler);
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
+
+──────────────────────────────────────────────────────────────────────────────
+5️⃣ src/routes/chat.ts
+---------------------------------
+Explicitly typed Express routes with latency, tokens, and cost headers.
+
+import express, { Request, Response } from "express";
+import { performance } from "perf_hooks";
+import { getAIResponse, streamAIResponse } from "../services/openaiService";
+import { estimateCost, tokensFromUsage } from "../utils/cost";
+import { asyncHandler } from "../middleware/http";
+
+const router = express.Router();
+
+router.post("/", asyncHandler(async (req: Request, res: Response) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: "Message required" });
+
+  const start = performance.now();
+  const { text, usage } = await getAIResponse(message);
+  const end = performance.now();
+
+  const latency = Number((end - start).toFixed(2));
+  const tokens = tokensFromUsage(usage);
+  const cost = estimateCost(usage);
+
+  res.setHeader("X-Latency", `${latency}ms`);
+  res.setHeader("X-Tokens-Used", String(tokens));
+  res.setHeader("X-Estimated-Cost", String(cost));
+
+  res.json({ reply: text, usage, meta: { latency_ms: latency, estimated_cost: cost } });
+}));
+
+router.post("/stream", asyncHandler(async (req: Request, res: Response) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).end("Message required");
+  await streamAIResponse(message, res);
+}));
+
+export default router;
+
+──────────────────────────────────────────────────────────────────────────────
+6️⃣ Verified Output (from Windows Command Prompt)
+---------------------------------
+Command:
+curl -i -X POST http://localhost:3000/api/chat ^
+     -H "Content-Type: application/json" ^
+     -d "{\"message\":\"Give me a 1-sentence leadership tip.\"}"
+
+Response:
+HTTP/1.1 200 OK
+X-Request-Id: 560c2398-1721-47e1-8b58-092fc2c0ccb8
+X-Latency: 1830.2ms
+X-Tokens-Used: 39
+X-Estimated-Cost: 0.000041
+...
+{"reply":"Empower your team by fostering an environment of open communication and collaboration, where every member feels valued and heard.","usage":{"prompt_tokens":17,"completion_tokens":22,"total_tokens":39},"meta":{"latency_ms":1830.2,"estimated_cost":0.000041}}
+
+──────────────────────────────────────────────────────────────────────────────
+🎯 Outcome
+You now have:
+• Robust error handling and request tracing  
+• Real-time latency + cost observability  
+• Structured JSON logging  
+• TypeScript-verified Express routes  
+• Production-quality headers for monitoring and dashboards  
+
+This is **enterprise-grade architecture** — you’ve reached the professional standard for an **AI Integration Engineer** backend.
+
+──────────────────────────────────────────────────────────────────────────────
+End of Week 1 – Step 5 (Production Readiness)

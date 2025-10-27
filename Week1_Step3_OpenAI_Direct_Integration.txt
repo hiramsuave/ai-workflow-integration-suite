@@ -1,0 +1,144 @@
+Week 1 – Step 3: OpenAI Direct Integration (Using Your Paid API Credits)
+
+🎯 Objective
+Integrate your existing OpenAI API key (no Azure required) directly into your Express + TypeScript backend. 
+Your API will now generate real AI responses from OpenAI's models.
+
+──────────────────────────────────────────────────────────────────────────────
+🪜 Step-by-Step Summary
+
+1️⃣ Verify the OpenAI SDK Installation
+---------------------------------------
+Check if the SDK is already installed:
+npm list openai
+
+If not installed, run:
+npm install openai
+
+This adds the official OpenAI Node SDK to your project.
+
+──────────────────────────────────────────────────────────────────────────────
+2️⃣ Confirm Your .env File
+---------------------------
+Ensure you have a .env file at your project root containing your OpenAI API key:
+
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+
+✅ This replaces Azure credentials; no endpoint or deployment name needed.
+
+──────────────────────────────────────────────────────────────────────────────
+3️⃣ Create the OpenAI Service File
+-----------------------------------
+Create a new folder and file:
+src/services/openaiService.ts
+
+Paste this code:
+
+import OpenAI from "openai";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function getAIResponse(message: string) {
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini", // or "gpt-4o", "gpt-3.5-turbo"
+      messages: [{ role: "user", content: message }],
+    });
+
+    return response.choices[0].message.content ?? "No response received.";
+  } catch (error: any) {
+    console.error("OpenAI API Error:", error);
+    return "⚠️ An error occurred while connecting to OpenAI.";
+  }
+}
+
+✅ This helper function handles all communication with the OpenAI API.
+
+──────────────────────────────────────────────────────────────────────────────
+4️⃣ Connect the Service to Your Route
+--------------------------------------
+Edit src/routes/chat.ts to use your new helper function:
+
+import express from "express";
+import { getAIResponse } from "../services/openaiService";
+
+const router = express.Router();
+
+router.post("/", async (req, res) => {
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  console.log("🧠 User message:", message);
+
+  const reply = await getAIResponse(message);
+
+  res.json({ reply });
+});
+
+export default router;
+
+✅ This connects your Express route (/api/chat) to OpenAI.
+
+──────────────────────────────────────────────────────────────────────────────
+5️⃣ Run and Test
+----------------
+Start your server:
+npm run dev
+
+Then test using curl (or Postman / Thunder Client):
+
+curl -X POST http://localhost:3000/api/chat ^
+     -H "Content-Type: application/json" ^
+     -d "{\"message\":\"Give me three ideas to increase nonprofit donations.\"}"
+
+✅ Expected Response:
+{
+  "reply": "1. Launch a donor spotlight campaign... 2. Use storytelling emails... 3. Offer monthly giving tiers..."
+}
+
+──────────────────────────────────────────────────────────────────────────────
+6️⃣ Confirm the Flow Works
+---------------------------
+When you see a valid AI-generated response, you’ve confirmed:
+• Express routing is correct.
+• OpenAI SDK integration is functional.
+• .env file is configured properly.
+
+──────────────────────────────────────────────────────────────────────────────
+🧠 Concept Summary
+You’ve now built a production-style backend that:
+- Accepts POST requests at /api/chat
+- Sends messages securely to OpenAI using your paid API key
+- Returns AI responses in clean JSON format
+- Requires no Azure setup or cost
+
+──────────────────────────────────────────────────────────────────────────────
+✅ Folder Structure (Final)
+ai-chat-api/
+├── node_modules/
+├── src/
+│   ├── app.ts
+│   ├── routes/
+│   │   └── chat.ts
+│   └── services/
+│       └── openaiService.ts
+├── .env
+├── package.json
+├── tsconfig.json
+└── package-lock.json
+
+──────────────────────────────────────────────────────────────────────────────
+🎯 Outcome
+Your /api/chat endpoint is now powered by OpenAI directly.
+This architecture mirrors real-world production setups for AI Integration Engineers.
+
+──────────────────────────────────────────────────────────────────────────────
+End of Week 1 – Step 3 (OpenAI Direct Integration)
