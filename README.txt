@@ -57,3 +57,4 @@ curl -X POST https://ai-workflow-integration-suite.onrender.com/api/chat \
 curl -N -X POST https://ai-workflow-integration-suite.onrender.com/api/chat/stream \
      -H "Content-Type: application/json" \
      -d '{"message":"Write a one-sentence leadership quote."}'
+

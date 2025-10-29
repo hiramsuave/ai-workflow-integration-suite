@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "npx ts-node src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
-  },
+    "start": "node dist/app.js",
+    "index:build": "npx ts-node src/services/ragIndex.ts"
+},
   "keywords": [
     "typescript",
     "express",
@@ -20,14 +21,15 @@
   "author": "Hiram Quezada",
   "license": "ISC",
   "dependencies": {
+    "@lancedb/lancedb": "^0.22.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "openai": "^4.67.3"
+    "openai": "^4.104.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.4",
+    "@types/express": "^5.0.5",
     "@types/node": "^24.9.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

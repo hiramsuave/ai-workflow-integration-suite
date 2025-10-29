@@ -1,0 +1,8 @@
+Q: What is RAG or what does RAG mean?
+A: RAG stands for Retrieval-Augmented Generation. It is a technique where a language model retrieves relevant information from a knowledge base before generating a response. This helps ensure accuracy and factual grounding.
+
+Q: What technology stack is used?
+A: Node.js, TypeScript, Express, and the OpenAI SDK for model integration.
+
+Q: What can this knowledge assistant do?
+A: It can read text files, convert them into embeddings, store them locally in LanceDB, and answer user questions with grounded citations.

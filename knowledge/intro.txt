@@ -1,0 +1,4 @@
+Welcome to the AI Workflow Integration Suite.
+This system demonstrates how AI engineers can build, deploy, and manage intelligent applications.
+It combines OpenAI GPT models with secure backend development, vector retrieval, and automation workflows.
+The goal is to show how to integrate AI into real-world business systems safely and efficiently.
