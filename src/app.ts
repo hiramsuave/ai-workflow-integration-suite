@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import chatRouter from "./routes/chat";
 import { withRequestId, errorHandler } from "./middleware/http";
+import queryRouter from "./routes/query";
+import demoRouter from "./routes/demo";
 
 dotenv.config();
 
@@ -18,6 +20,8 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/chat", chatRouter);
+app.use("/api/query", queryRouter);
+app.use("/rag-demo", demoRouter);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
