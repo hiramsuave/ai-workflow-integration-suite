@@ -1,1 +1,5 @@
+node_modules/
+.lancedb/
 .env
+.DS_Store
+dist/
