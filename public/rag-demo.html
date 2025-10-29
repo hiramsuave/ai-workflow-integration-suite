@@ -59,12 +59,32 @@
       color: #555;
       margin-top: 10px;
     }
+    /* 🔹 Environment banner */
+    .banner {
+      text-align: center;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      font-weight: bold;
+    }
+    .local {
+      background-color: #e3fcef;
+      color: #0b6e28;
+      border: 1px solid #7cd992;
+    }
+    .deployed {
+      background-color: #eaf1ff;
+      color: #003d99;
+      border: 1px solid #80aaff;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div id="envBanner" class="banner"></div>
     <h1>🧠 RAG Knowledge Assistant</h1>
-    <p>Ask a question based on the local knowledge base:</p>
+    <p>Ask a question based on the local or deployed knowledge base:</p>
     <textarea id="question" placeholder="e.g., What does RAG mean?"></textarea>
     <button id="ask">Ask</button>
 
@@ -73,6 +93,21 @@
   </div>
 
   <script>
+    // 🧭 Detect environment
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const baseURL = isLocal ? "http://localhost:3000" : window.location.origin;
+
+    // 💡 Show banner
+    const banner = document.getElementById("envBanner");
+    if (isLocal) {
+      banner.className = "banner local";
+      banner.textContent = "🔵 Local Mode — Using LanceDB for vector search";
+    } else {
+      banner.className = "banner deployed";
+      banner.textContent = "☁️ Cloud Mode — Using text-based fallback on Render";
+    }
+
+    // 🧠 Ask button handler
     document.getElementById("ask").addEventListener("click", async () => {
       const question = document.getElementById("question").value.trim();
       if (!question) return alert("Please enter a question.");
@@ -84,7 +119,7 @@
       citationDiv.innerText = "";
 
       try {
-        const res = await fetch("/api/query", {
+        const res = await fetch(`${baseURL}/api/query`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question })
